@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"net"
@@ -25,27 +24,11 @@ func Start() {
 			log.Fatal(err)
 		}
 
-		request := getMessage(conn)
-
-		httphelper.ProcessRequest(conn, request)
+		resp := httphelper.ProcessRequest(conn)
+		_, err = conn.Write(resp)
+		if err != nil {
+			log.Fatal(err)
+		}
 		conn.Close()
 	}
-}
-
-func getMessage(conn net.Conn) string {
-	// defer conn.Close()
-
-	reader := bufio.NewReader(conn)
-
-	var request string
-
-	for {
-		message, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Println("Client disconnected:", err)
-			request = message
-			break
-		}
-	}
-	return request
 }
