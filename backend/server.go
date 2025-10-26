@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
 
 	httphelper "github.com/SamvelHov02/HomeCloudHTTP"
 )
@@ -15,8 +16,8 @@ func Start() {
 	t.Build()
 
 	e := httphelper.EndPoint{}
-	e.Get("/Tree", GetTree)
-	e.Get("Default", GetResource)
+	e.Get("/api/get/tree", GetTree)
+	e.Get("/api/get", GetResource)
 	// Listen on port :8080 for connection
 	l, err := net.Listen("tcp", ":8080")
 	fmt.Println("Listening on port 8080")
@@ -32,29 +33,11 @@ func Start() {
 			log.Fatal(err)
 		}
 
-		responseHeader := httphelper.Header{}
-
-		// resp := httphelper.ProcessRequest(conn)
 		req := httphelper.ReadRequest(conn)
 
-		var resp []byte
+		fn := e.Action(req.Method, req.Resource)
 
-		if req.Method == "Get" {
-			if fn, ok := e.GetEndpoints[req.Resource]; ok {
-				bodyByte := fn(req)
-				resp = httphelper.WriteResponse(bodyByte, httphelper.HTTPStatus{Code: 200}, responseHeader)
-			} else {
-				fn := e.GetEndpoints["Default"]
-				bodyByte := fn(req)
-				resp = httphelper.WriteResponse(bodyByte, httphelper.HTTPStatus{Code: 200}, responseHeader)
-			}
-		} else if req.Method == "Post" {
-
-		} else if req.Method == "Put" {
-
-		} else if req.Method == "Delete" {
-
-		}
+		resp := fn(req)
 
 		_, err = conn.Write(resp)
 		if err != nil {
@@ -65,20 +48,29 @@ func Start() {
 }
 
 // Function for different endpoints
-func GetTree(req httphelper.HTTPRequest) []byte {
+func GetTree(req httphelper.Request) []byte {
 	t.ComputeHash()
 	data, err := t.JSON()
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	respHeader := httphelper.Header{
+		"Content-Type":   []string{"application/json"},
+		"Content-Length": []string{strconv.Itoa(len(data))},
+	}
+
+	data = httphelper.WriteResponse(data, httphelper.Status{Code: 200}, respHeader)
 	return data
 }
 
-func GetResource(req httphelper.HTTPRequest) []byte {
-	data, status, _ := httphelper.ReadGetMethod(req.Resource, req.Headers)
+func GetResource(req httphelper.Request) []byte {
+	data, status, respHeader := httphelper.ReadGetMethod(req.Resource, req.Headers)
 	if status.Code != 200 {
 		return nil
 	}
+
+	data = httphelper.WriteResponse(data, status, respHeader)
 	return data
 }
