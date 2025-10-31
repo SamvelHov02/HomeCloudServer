@@ -35,7 +35,13 @@ func Start() {
 
 		req := httphelper.ReadRequest(conn)
 
+		fmt.Println("Original Resource Path: ", req.Resource)
+
+		fmt.Println("Received Request: ", req.Method, " ", req.Resource)
+
 		fn := e.Action(req.Method, req.Resource)
+
+		req.Resource = apiToActualPath(req.Resource)
 
 		resp := fn(req)
 
@@ -66,6 +72,7 @@ func GetTree(req httphelper.Request) []byte {
 }
 
 func GetResource(req httphelper.Request) []byte {
+	fmt.Println("Getting Resource: ", req.Resource)
 	data, status, respHeader := httphelper.ReadGetMethod(req.Resource, req.Headers)
 	if status.Code != 200 {
 		return nil
@@ -73,4 +80,10 @@ func GetResource(req httphelper.Request) []byte {
 
 	data = httphelper.WriteResponse(data, status, respHeader)
 	return data
+}
+
+// API endpoint and actual path are different
+// e.g. /api/get/file.txt -> /Vault/file.txt
+func apiToActualPath(apiPath string) string {
+	return apiPath[len("/api/get"):]
 }
