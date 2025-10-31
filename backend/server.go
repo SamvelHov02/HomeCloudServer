@@ -34,11 +34,6 @@ func Start() {
 		}
 
 		req := httphelper.ReadRequest(conn)
-
-		fmt.Println("Original Resource Path: ", req.Resource)
-
-		fmt.Println("Received Request: ", req.Method, " ", req.Resource)
-
 		fn := e.Action(req.Method, req.Resource)
 
 		req.Resource = apiToActualPath(req.Resource)
@@ -72,7 +67,6 @@ func GetTree(req httphelper.Request) []byte {
 }
 
 func GetResource(req httphelper.Request) []byte {
-	fmt.Println("Getting Resource: ", req.Resource)
 	data, status, respHeader := httphelper.ReadGetMethod(req.Resource, req.Headers)
 	if status.Code != 200 {
 		return nil
