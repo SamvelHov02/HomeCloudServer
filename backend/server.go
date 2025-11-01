@@ -67,7 +67,7 @@ func GetTree(req httphelper.Request) []byte {
 }
 
 func GetResource(req httphelper.Request) []byte {
-	data, status, respHeader := httphelper.ReadGetMethod(req.Resource, req.Headers)
+	data, status, respHeader := GetFile(req)
 	if status.Code != 200 {
 		return nil
 	}
