@@ -18,7 +18,8 @@ func Start() {
 	e := httphelper.EndPoint{}
 	e.Get("/api/get/tree", GetTree)
 	e.Get("/api/get", GetResource)
-	e.Post("/api/post", PostResource)
+	e.Post("/api/post", PostResourceFile)
+	e.Post("/api/post/dir", PostResourceDir)
 	// Listen on port :8080 for connection
 	l, err := net.Listen("tcp", ":8080")
 	fmt.Println("Listening on port 8080")
@@ -77,10 +78,15 @@ func GetResource(req httphelper.Request) []byte {
 	return data
 }
 
-func PostResource(req httphelper.Request) []byte {
+func PostResourceFile(req httphelper.Request) []byte {
 	data, status, respHeader := httphelper.ReadPostMethod(req)
 
 	data = httphelper.WriteResponse(data, status, respHeader)
+	return data
+}
+
+func PostResourceDir(req httphelper.Request) []byte {
+	data, _, _ := httphelper.ReadPostMethod(req)
 	return data
 }
 
