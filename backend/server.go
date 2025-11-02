@@ -37,9 +37,9 @@ func Start() {
 
 		req := httphelper.ReadRequest(conn)
 		fmt.Println(req)
-		fn := e.Action(req.Method, req.Resource)
+		fn, endpoint := e.Action(req.Method, req.Resource)
 
-		req.Resource = apiToActualPath(req.Resource, req.Method)
+		req.Resource = req.Resource[len(endpoint):]
 
 		resp := fn(req)
 
@@ -92,10 +92,4 @@ func PostResourceDir(req httphelper.Request) []byte {
 	Data = httphelper.WriteResponse(Data, Status, RespHeader)
 	fmt.Println(string(Data))
 	return Data
-}
-
-// API endpoint and actual path are different
-// e.g. /api/get/file.txt -> /Vault/file.txt
-func apiToActualPath(apiPath string, method string) string {
-	return apiPath[len("/api/")+len(method):]
 }
