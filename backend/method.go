@@ -2,6 +2,7 @@ package backend
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -116,6 +117,7 @@ outer:
 	}
 
 	if Status.Code == 0 {
+		fmt.Println(VaultPath + req.Resource)
 		if _, err := os.Stat(VaultPath + req.Resource); os.IsNotExist(err) {
 			err = os.Mkdir(VaultPath+req.Resource, 0755)
 

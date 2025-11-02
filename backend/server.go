@@ -18,6 +18,8 @@ func Start() {
 	e := httphelper.EndPoint{}
 	e.Get("/api/get/tree", GetTree)
 	e.Get("/api/get", GetResource)
+	e.Post("/api/post", PostResourceFile)
+	e.Post("/api/post/dir", PostResourceDir)
 	// Listen on port :8080 for connection
 	l, err := net.Listen("tcp", ":8080")
 	fmt.Println("Listening on port 8080")
@@ -34,9 +36,10 @@ func Start() {
 		}
 
 		req := httphelper.ReadRequest(conn)
-		fn := e.Action(req.Method, req.Resource)
+		fmt.Println(req)
+		fn, endpoint := e.Action(req.Method, req.Resource)
 
-		req.Resource = apiToActualPath(req.Resource)
+		req.Resource = req.Resource[len(endpoint):]
 
 		resp := fn(req)
 
@@ -76,8 +79,17 @@ func GetResource(req httphelper.Request) []byte {
 	return data
 }
 
-// API endpoint and actual path are different
-// e.g. /api/get/file.txt -> /Vault/file.txt
-func apiToActualPath(apiPath string) string {
-	return apiPath[len("/api/get"):]
+func PostResourceFile(req httphelper.Request) []byte {
+	Data, Status, RespHeader := PostFile(req)
+
+	Data = httphelper.WriteResponse(Data, Status, RespHeader)
+	return Data
+}
+
+func PostResourceDir(req httphelper.Request) []byte {
+	Data, Status, RespHeader := PostDir(req)
+
+	Data = httphelper.WriteResponse(Data, Status, RespHeader)
+	fmt.Println(string(Data))
+	return Data
 }
