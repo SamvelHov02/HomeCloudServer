@@ -36,6 +36,7 @@ func Start() {
 		}
 
 		req := httphelper.ReadRequest(conn)
+		fmt.Println(req)
 		fn := e.Action(req.Method, req.Resource)
 
 		req.Resource = apiToActualPath(req.Resource, req.Method)
@@ -89,6 +90,7 @@ func PostResourceDir(req httphelper.Request) []byte {
 	Data, Status, RespHeader := PostDir(req)
 
 	Data = httphelper.WriteResponse(Data, Status, RespHeader)
+	fmt.Println(string(Data))
 	return Data
 }
 
