@@ -136,3 +136,44 @@ outer:
 
 	return []byte{}, Status, RespHeader
 }
+
+func PutFile(req httphelper.Request) ([]byte, httphelper.Status, httphelper.Header) {
+	var respHeader httphelper.Header
+	var Status httphelper.Status
+
+outer:
+	for _, key := range req.Headers.Keys() {
+		switch key {
+		case "Content-Type":
+			if h, _ := req.Headers.Get(key); h[0] != "application/json" {
+				Status.Code = 400
+				break outer
+			}
+		case "Content-Length":
+			val, _ := req.Headers.Get(key)
+			lenVal, err := strconv.Atoi(val[0])
+
+			if lenVal <= 0 || err != nil {
+				Status.Code = 400
+				break outer
+			}
+		}
+	}
+
+	if Status.Code == 0 {
+		if _, err := os.Stat(VaultPath + req.Resource); os.IsNotExist(err) {
+			err = os.WriteFile(VaultPath+req.Resource, []byte(req.Data.Data), 0644)
+
+			if err != nil {
+				Status.Code = 400
+			}
+
+			Status.Code = 200
+		}
+	}
+
+	respHeader.Add("Content-Type", "application/json")
+	respHeader.Add("Content-Length", "0")
+
+	return []byte{}, Status, respHeader
+}
