@@ -21,6 +21,8 @@ func Start() {
 	e.Post("/api/post", PostResourceFile)
 	e.Post("/api/post/dir", PostResourceDir)
 	e.Put("/api/put", UpdateFile)
+	e.Delete("/api/delete", DeleteFileHandler)
+	e.Delete("/api/delete/dir", DeleteDirHandler)
 	// Listen on port :8080 for connection
 	l, err := net.Listen("tcp", ":8080")
 	fmt.Println("Listening on port 8080")
@@ -99,4 +101,12 @@ func UpdateFile(req httphelper.Request) []byte {
 
 	Data = httphelper.WriteResponse(Data, Status, RespHeader)
 	return Data
+}
+
+func DeleteFileHandler(req httphelper.Request) []byte {
+	return []byte{}
+}
+
+func DeleteDirHandler(req httphelper.Request) []byte {
+	return []byte{}
 }
