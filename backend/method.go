@@ -161,7 +161,7 @@ outer:
 	}
 
 	if Status.Code == 0 {
-		if _, err := os.Stat(VaultPath + req.Resource); os.IsNotExist(err) {
+		if _, err := os.Stat(VaultPath + req.Resource); err == nil {
 			err = os.WriteFile(VaultPath+req.Resource, []byte(req.Data.Data), 0644)
 
 			if err != nil {

@@ -37,7 +37,6 @@ func Start() {
 		}
 
 		req := httphelper.ReadRequest(conn)
-		fmt.Println(req)
 		fn, endpoint := e.Action(req.Method, req.Resource)
 
 		req.Resource = req.Resource[len(endpoint):]
