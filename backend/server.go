@@ -104,9 +104,15 @@ func UpdateFile(req httphelper.Request) []byte {
 }
 
 func DeleteFileHandler(req httphelper.Request) []byte {
-	return []byte{}
+	Data, Status, RespHeader := DeleteFile(req)
+
+	Data = httphelper.WriteResponse(Data, Status, RespHeader)
+	return Data
 }
 
 func DeleteDirHandler(req httphelper.Request) []byte {
-	return []byte{}
+	Data, Status, RespHeader := DeleteDir(req)
+
+	Data = httphelper.WriteResponse(Data, Status, RespHeader)
+	return Data
 }
