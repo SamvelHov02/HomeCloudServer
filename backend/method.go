@@ -177,3 +177,53 @@ outer:
 
 	return []byte{}, Status, respHeader
 }
+
+func DeleteFile(req httphelper.Request) ([]byte, httphelper.Status, httphelper.Header) {
+	var RespHeader httphelper.Header
+	var Status httphelper.Status
+
+	Info, err := os.Stat(VaultPath + req.Resource)
+
+	// If resource is dir or doesn't exist, its a bad request
+	if Info.IsDir() || err != nil {
+		Status.Code = 400
+	}
+
+	err = os.Remove(VaultPath + req.Resource)
+
+	if err != nil {
+		Status.Code = 400
+	} else {
+		Status.Code = 204
+	}
+
+	RespHeader.Add("Content-Type", "application/json")
+	RespHeader.Add("Content-Length", "0")
+
+	return []byte{}, Status, RespHeader
+}
+
+func DeleteDir(req httphelper.Request) ([]byte, httphelper.Status, httphelper.Header) {
+	var RespHeader httphelper.Header
+	var Status httphelper.Status
+
+	Info, err := os.Stat(VaultPath + req.Resource)
+
+	// If resource isn't a dir or doesn't exist, its a bad request
+	if !Info.IsDir() || err != nil {
+		Status.Code = 400
+	}
+
+	err = os.RemoveAll(VaultPath + req.Resource)
+
+	if err != nil {
+		Status.Code = 400
+	} else {
+		Status.Code = 204
+	}
+
+	RespHeader.Add("Content-Type", "application/json")
+	RespHeader.Add("Content-Length", "0")
+
+	return []byte{}, Status, RespHeader
+}
