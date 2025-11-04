@@ -24,6 +24,7 @@ func Start() {
 	e.Delete("/api/delete", DeleteFileHandler)
 	e.Delete("/api/delete/dir", DeleteDirHandler)
 	// Listen on port :8080 for connection
+	InitDBPath()
 	l, err := net.Listen("tcp", ":8080")
 	fmt.Println("Listening on port 8080")
 

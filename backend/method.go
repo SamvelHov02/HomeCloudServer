@@ -10,7 +10,13 @@ import (
 	httphelper "github.com/SamvelHov02/HomeCloudHTTP"
 )
 
-const VaultPath = "/home/samo/dev/HomeCloud/server"
+var VaultPath = "/home/samo/dev/HomeCloud/server"
+
+func InitDBPath() {
+	if path, exists := os.LookupEnv("DB_PATH"); exists {
+		VaultPath = path
+	}
+}
 
 // Function returns the requested file
 func GetFile(req httphelper.Request) ([]byte, httphelper.Status, httphelper.Header) {
