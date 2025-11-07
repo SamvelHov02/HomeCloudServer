@@ -43,6 +43,7 @@ func Start() {
 		fn, endpoint := e.Action(req.Method, req.Resource)
 
 		req.Resource = req.Resource[len(endpoint):]
+		req.Resource = httphelper.ResourceToPath(req.Resource)
 
 		resp := fn(req)
 
