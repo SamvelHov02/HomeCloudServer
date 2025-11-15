@@ -10,7 +10,8 @@ import (
 	httphelper "github.com/SamvelHov02/HomeCloudHTTP"
 )
 
-var VaultPath = "/home/samo/dev/HomeCloud/server"
+// var VaultPath = "/home/samo/dev/HomeCloud/server"
+var VaultPath = "/Users/samvelhovhannisyan/Documents/dev/Personal/HomeCloud/server"
 
 func InitDBPath() {
 	if path, exists := os.LookupEnv("DB_PATH"); exists {
@@ -23,28 +24,31 @@ func GetFile(req httphelper.Request) ([]byte, httphelper.Status, httphelper.Head
 	resp := httphelper.Body{}
 	respHeader := httphelper.Header{}
 	var Status httphelper.Status
-	fileData, err := os.ReadFile(VaultPath + req.Resource)
+	var dataBytes []byte
+	
+	// Get only works for fetching files
+	if Info, err := os.Stat(VaultPath + req.Resource); err == nil && !Info.IsDir(){
+		fileData, _ := os.ReadFile(VaultPath + req.Resource)
 
-	if err != nil {
-		log.Fatal(err)
-	}
+		Status.Code = 200
 
-	Status.Code = 200
-
-	for _, key := range req.Headers.Keys() {
-		switch key {
-		case "Accept":
-			val, _ := req.Headers.Get(key)
-			if val[0] == "application/json" {
-				resp.Data = string(fileData)
+		for _, key := range req.Headers.Keys() {
+			switch key {
+			case "Accept":
+				val, _ := req.Headers.Get(key)
+				if val[0] == "application/json" {
+					resp.Data = string(fileData)
+				}
 			}
 		}
-	}
 
-	dataBytes, err := json.Marshal(resp)
-	if err != nil {
-		log.Fatal(err)
-	}
+		dataBytes, err = json.Marshal(resp)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		Status.Code = 404 
+	}	
 
 	respHeader.Add("Content-Type", "application/json")
 	respHeader.Add("Content-Length", strconv.Itoa(len(dataBytes)))
@@ -175,6 +179,8 @@ outer:
 			}
 
 			Status.Code = 200
+		} else {
+			Status.Code = 404 
 		}
 	}
 
@@ -191,16 +197,18 @@ func DeleteFile(req httphelper.Request) ([]byte, httphelper.Status, httphelper.H
 	Info, err := os.Stat(VaultPath + req.Resource)
 
 	// If resource is dir or doesn't exist, its a bad request
-	if Info.IsDir() || err != nil {
-		Status.Code = 400
-	}
-
-	err = os.Remove(VaultPath + req.Resource)
-
 	if err != nil {
+		Status.Code = 404
+	} else if Info.IsDir(){
 		Status.Code = 400
 	} else {
-		Status.Code = 204
+		err = os.Remove(VaultPath + req.Resource)
+
+		if err != nil {
+			Status.Code = 400
+		} else {
+			Status.Code = 204
+		}
 	}
 
 	RespHeader.Add("Content-Type", "application/json")
@@ -216,16 +224,18 @@ func DeleteDir(req httphelper.Request) ([]byte, httphelper.Status, httphelper.He
 	Info, err := os.Stat(VaultPath + req.Resource)
 
 	// If resource isn't a dir or doesn't exist, its a bad request
-	if !Info.IsDir() || err != nil {
-		Status.Code = 400
-	}
-
-	err = os.RemoveAll(VaultPath + req.Resource)
-
 	if err != nil {
+		Status.Code = 404
+	} else if !Info.IsDir(){
 		Status.Code = 400
-	} else {
-		Status.Code = 204
+	} else{
+		err = os.RemoveAll(VaultPath + req.Resource)
+
+		if err != nil {
+			Status.Code = 400
+		} else {
+			Status.Code = 204
+		}
 	}
 
 	RespHeader.Add("Content-Type", "application/json")

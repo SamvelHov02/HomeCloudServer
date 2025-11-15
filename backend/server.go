@@ -34,23 +34,18 @@ func Start() {
 
 	for {
 		// Wait for connection request
-		conn, err := l.Accept()
-		if err != nil {
-			log.Fatal(err)
-		}
-
+		conn, _ := l.Accept()
+		
 		req := httphelper.ReadRequest(conn)
 		fn, endpoint := e.Action(req.Method, req.Resource)
 
 		req.Resource = req.Resource[len(endpoint):]
 		req.Resource = httphelper.ResourceToPath(req.Resource)
 
-		resp := fn(req)
-
-		_, err = conn.Write(resp)
-		if err != nil {
-			log.Fatal(err)
-		}
+		resp := fn(req)	
+		fmt.Println(string(resp))
+			
+		conn.Write(resp)
 		conn.Close()
 	}
 }
@@ -75,12 +70,8 @@ func GetTree(req httphelper.Request) []byte {
 
 func GetResource(req httphelper.Request) []byte {
 	data, status, respHeader := GetFile(req)
-	if status.Code != 200 {
-		return nil
-	}
 
-	data = httphelper.WriteResponse(data, status, respHeader)
-	return data
+	return httphelper.WriteResponse(data, status, respHeader)
 }
 
 func PostResourceFile(req httphelper.Request) []byte {
